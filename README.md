@@ -3,7 +3,7 @@
 
 A simple `java` GUI which will take a 'Series Matrix File' downloaded directly from [GEO](https://www.ncbi.nlm.nih.gov/gds/) (search for the data set you need), allow user defined sample grouping (ensure you have understood the experimental design implimented in the study) and calculate [Effect size (Cohen's d)](https://en.wikipedia.org/wiki/Effect_size) per gene. Users can then export a `csv` file containing the top 'N' (also user defined) genes and their corresponding Cohen's d values.
 
-A pre-compiled `JAR` file can be found in [Releases]().
+A pre-compiled `JAR` file can be found in [Releases](https://github.com/DrATedder/GEO_EffectSizeApp/releases/tag/v0.1.0).
 
 ---
 
