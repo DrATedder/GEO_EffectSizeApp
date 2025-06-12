@@ -1,0 +1,17 @@
+# Ignore compiled class files
+bin/
+
+# Ignore JAR files
+*.jar
+
+# Ignore manifest files if you want to exclude them (optional)
+# MANIFEST.MF
+
+# Ignore OS generated files (optional but recommended)
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files (optional, add if you use any)
+.vscode/
+.idea/
+*.iml
