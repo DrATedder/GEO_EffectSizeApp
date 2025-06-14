@@ -22,7 +22,7 @@ public class Main {
     }
 
     private void createAndShowGUI() {
-        frame = new JFrame("Cohen's d from GEO Series Matrix");
+        frame = new JFrame("Effect size from GEO Series Matrix");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(900, 700);
 
@@ -130,35 +130,67 @@ public class Main {
         Map<String, double[]> matrix = loadMatrix.loadMatrix(loadedFile);
         results = EffectSizeCalculator.computeCohensD(matrix, group1, group2);
 
-        // Sort results by Cohen’s d descending
         results.sort((a, b) -> Double.compare(Math.abs(b.getCohensD()), Math.abs(a.getCohensD())));
 
         resultTable.setModel(new EffectTableModel(results));
-
         summaryLabel.setText("Results sorted by descending effect size (Cohen's d)");
     }
 
     private void exportTopGenes() {
         if (results == null || results.isEmpty()) return;
 
-        String input = JOptionPane.showInputDialog(frame, "Enter number of top genes to export:", "Top N Genes", JOptionPane.PLAIN_MESSAGE);
-        if (input == null || input.trim().isEmpty()) return;
+        String[] options = { "Top N Genes", "Genes with |d| ≥ Threshold" };
+        int choice = JOptionPane.showOptionDialog(frame, "Choose export method:", "Export Options",
+                JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 
-        int topN;
-        try {
-            topN = Integer.parseInt(input.trim());
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(frame, "Invalid number entered.", "Error", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        if (choice == 0) {
+            String input = JOptionPane.showInputDialog(frame, "Enter number of top genes to export:", "Top N Genes", JOptionPane.PLAIN_MESSAGE);
+            if (input == null || input.trim().isEmpty()) return;
 
-        if (topN <= 0) return;
+            int topN;
+            try {
+                topN = Integer.parseInt(input.trim());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(frame, "Invalid number entered.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        int returnVal = fileChooser.showSaveDialog(frame);
-        if (returnVal == JFileChooser.APPROVE_OPTION) {
-            File file = fileChooser.getSelectedFile();
-            List<EffectResult> topResults = results.stream().limit(topN).collect(Collectors.toList());
-            CSVUtils.exportResults(file, topResults);
+            if (topN <= 0) return;
+
+            int returnVal = fileChooser.showSaveDialog(frame);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                List<EffectResult> topResults = results.stream().limit(topN).collect(Collectors.toList());
+                CSVUtils.exportResults(file, topResults);
+            }
+        } else if (choice == 1) {
+            String input = JOptionPane.showInputDialog(frame, "Enter minimum |Cohen's d| threshold:", "Effect Size Threshold", JOptionPane.PLAIN_MESSAGE);
+            if (input == null || input.trim().isEmpty()) return;
+
+            double threshold;
+            try {
+                threshold = Double.parseDouble(input.trim());
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(frame, "Invalid threshold entered.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (threshold < 0) {
+                JOptionPane.showMessageDialog(frame, "Threshold must be ≥ 0.", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            List<EffectResult> filtered = EffectSizeCalculator.filterByThreshold(results, threshold);
+            if (filtered.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "No genes meet the threshold.", "Info", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+
+            int returnVal = fileChooser.showSaveDialog(frame);
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                File file = fileChooser.getSelectedFile();
+                CSVUtils.exportResults(file, filtered);
+            }
         }
     }
 }

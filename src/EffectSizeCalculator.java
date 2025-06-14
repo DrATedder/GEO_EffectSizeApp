@@ -82,6 +82,15 @@ public class EffectSizeCalculator {
         double pooledSD = Math.sqrt(((g1.size() - 1) * var1 + (g2.size() - 1) * var2) / (g1.size() + g2.size() - 2));
         return (pooledSD == 0) ? 0 : (mean1 - mean2) / pooledSD;
     }
-}
 
+    public static List<EffectResult> filterByThreshold(List<EffectResult> results, double threshold) {
+        List<EffectResult> filtered = new ArrayList<>();
+        for (EffectResult result : results) {
+            if (Math.abs(result.getCohensD()) >= threshold) {
+                filtered.add(result);
+            }
+        }
+        return filtered;
+    }
+}
 
